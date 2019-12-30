@@ -31,7 +31,6 @@ class App extends Component {
       }, this.geoCode()),
       err => this.setState({ errorMessage: err.message })
     );
-
   }
 
   //when map picker changing
@@ -60,15 +59,13 @@ class App extends Component {
   render() {
     const { position, address } = this.state
 
-    console.log("tipe:", typeof position.lng);
-
-
     return (
       <div>
         {!position ? null :
 
           <Fragment>
-            <h1>{address}</h1>
+            <input type="text" value={address} />
+
             <h4>latitude : {position.lat}</h4>
             <h4>longitude :{position.lng}</h4>
 
