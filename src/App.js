@@ -9,12 +9,12 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      address: null,
+      address: null, //alamat yg sedang digunakna
       position: {
-        lat: null,
-        lng: null
+        lat: null, //koordinat latitude yg sedang digunakna
+        lng: null //koordinat longitude yg sedang digunakna
       },
-      addressesSuggestion: null
+      addressesSuggestion: null // daftar saran alamat yg didapatkan dari geocode
     }
     this.handleLocationChange = this.handleLocationChange.bind(this);
   }
@@ -23,7 +23,7 @@ class App extends Component {
     this.locationInitiation()
   }
 
-  //set default location -> current location
+  //set default location -> current location -> sehingga pada saat awal membuka apps korrdinat awal ialah koordinat pengguna saat ini note : browser harus memperbolehkan get location
   locationInitiation() {
     window.navigator.geolocation.getCurrentPosition(
       position => this.setState({
@@ -31,7 +31,7 @@ class App extends Component {
           lat: position.coords.latitude,
           lng: position.coords.longitude
         }
-      }, this.geoCode()),
+      }),
       err => this.setState({ errorMessage: err.message })
     );
   }
@@ -39,20 +39,16 @@ class App extends Component {
   //when map picker changing
   handleLocationChange({ position, address, places }) {
     this.setState({ position, address });
-    this.geoCode()
   }
 
+  //handling ketika input address berubah dan memberikan keluaran berupa daftar alamat yg disimpan di state -> addressesSuggestion
   geoCode(addressInput) {
     Geocode.setApiKey(process.env.REACT_APP_GOOGLE_MAP_API);
     Geocode.setLanguage("id");
     Geocode.setRegion("id");
 
-    Geocode.fromAddress("doogether").then(
+    Geocode.fromAddress(addressInput).then(
       response => {
-        // const { lat, lng } = response.results[0].geometry.location;
-
-        console.log("addressesSuggestion :", response.results);
-
         this.setState({ addressesSuggestion: response.results })
       },
       error => {
@@ -67,12 +63,12 @@ class App extends Component {
     return (
       <div>
         {!position ? null :
-
           <Fragment>
-            <input type="text" value={address} />
+            <input type="text" value={address} onChange={(event) => this.setState({ address: event.target.value }, this.geoCode(event.target.value))} />
             <div>
               select from this list :
               <ul>
+                {/* implementasi dari react geocode */}
                 {
                   !addressesSuggestion ? null :
                     addressesSuggestion.map(address =>
@@ -88,6 +84,7 @@ class App extends Component {
             <h4>latitude : {position.lat}</h4>
             <h4>longitude :{position.lng}</h4>
 
+            {/* implementasi dari LocationPicker  */}
             <div>
               <LocationPicker
                 containerElement={<div style={{ height: '100%' }} />}
