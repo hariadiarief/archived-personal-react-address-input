@@ -3,6 +3,8 @@ import React, { Component, Fragment } from 'react';
 import LocationPicker from 'react-location-picker';
 import Geocode from "react-geocode";
 
+import "./App.css"
+
 class App extends Component {
   constructor(props) {
     super(props);
@@ -11,7 +13,8 @@ class App extends Component {
       position: {
         lat: null,
         lng: null
-      }
+      },
+      addressesSuggestion: null
     }
     this.handleLocationChange = this.handleLocationChange.bind(this);
   }
@@ -39,16 +42,18 @@ class App extends Component {
     this.geoCode()
   }
 
-  geoCode() {
+  geoCode(addressInput) {
     Geocode.setApiKey(process.env.REACT_APP_GOOGLE_MAP_API);
-    Geocode.setLanguage("en");
+    Geocode.setLanguage("id");
     Geocode.setRegion("id");
 
-    const { position } = this.state
-    Geocode.fromLatLng(position.lat, position.lng).then(
+    Geocode.fromAddress("doogether").then(
       response => {
-        const address = response.results[0].formatted_address;
-        console.log(address);
+        // const { lat, lng } = response.results[0].geometry.location;
+
+        console.log("addressesSuggestion :", response.results);
+
+        this.setState({ addressesSuggestion: response.results })
       },
       error => {
         console.error(error);
@@ -57,7 +62,7 @@ class App extends Component {
   }
 
   render() {
-    const { position, address } = this.state
+    const { position, address, addressesSuggestion } = this.state
 
     return (
       <div>
@@ -65,6 +70,20 @@ class App extends Component {
 
           <Fragment>
             <input type="text" value={address} />
+            <div>
+              select from this list :
+              <ul>
+                {
+                  !addressesSuggestion ? null :
+                    addressesSuggestion.map(address =>
+                      <li className="addressSelect" onClick={() => this.setState({ position: { lat: address.geometry.location.lat, lng: address.geometry.location.lng } })} >
+                        {address.formatted_address}
+                      </li>
+
+                    )
+                }
+              </ul>
+            </div>
 
             <h4>latitude : {position.lat}</h4>
             <h4>longitude :{position.lng}</h4>
